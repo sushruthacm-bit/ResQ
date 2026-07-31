@@ -1,0 +1,166 @@
+{
+  "info": {
+    "name": "ResQ – Emergency Dispatch API",
+    "_postman_id": "resq-collection-v1",
+    "description": "Complete API collection for ResQ – AI-Assisted Emergency Request & Dispatch Management System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3000", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/health",
+        "description": "Verify the API server is running."
+      }
+    },
+    {
+      "name": "Emergencies",
+      "item": [
+        {
+          "name": "Create Emergency Request",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/emergencies",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": 1,\n  \"latitude\": 40.7128,\n  \"longitude\": -74.0060,\n  \"description\": \"Person collapsed on the street, not breathing and unresponsive.\"\n}"
+            },
+            "description": "Creates a new emergency request. AI classifies the description and result is saved to PostgreSQL and enqueued in Redis."
+          }
+        },
+        {
+          "name": "Get Pending Emergencies",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/emergencies/pending",
+            "description": "Returns pending emergencies sorted by priority from the Redis queue."
+          }
+        },
+        {
+          "name": "Get Active Emergencies",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/emergencies/active",
+            "description": "Returns all active (non-resolved, non-cancelled) emergencies from PostgreSQL."
+          }
+        },
+        {
+          "name": "Update Emergency Status – in_progress",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/api/emergencies/1/status",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"in_progress\",\n  \"changed_by\": 3\n}"
+            },
+            "description": "Updates the status of emergency #1 to in_progress."
+          }
+        },
+        {
+          "name": "Update Emergency Status – resolved",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/api/emergencies/1/status",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"resolved\",\n  \"changed_by\": 3\n}"
+            },
+            "description": "Resolves emergency #1. Triggers emergency:resolved event and removes from Redis queue."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Responders",
+      "item": [
+        {
+          "name": "Get All Responders",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/responders",
+            "description": "Returns all responders with their current status."
+          }
+        },
+        {
+          "name": "Assign Responder to Emergency",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/responders/assign",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"request_id\": 2,\n  \"responder_id\": 1\n}"
+            },
+            "description": "Assigns a responder to an emergency. Updates PostgreSQL, removes from Redis queue, triggers event."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dispatch",
+      "item": [
+        {
+          "name": "Send Dispatch Notification",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/dispatch/notify",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"request_id\": 1\n}"
+            },
+            "description": "Simulates a dispatch notification using EventEmitter. Logs the notification."
+          }
+        }
+      ]
+    },
+    {
+      "name": "AI Classification",
+      "item": [
+        {
+          "name": "Classify – Medical",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/ai/classify",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Elderly man having a heart attack, chest pain and difficulty breathing.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Classify – Fire",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/ai/classify",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Large fire and smoke coming from a warehouse building.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Classify – Police",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/ai/classify",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Armed robbery in progress at the local bank.\"\n}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
