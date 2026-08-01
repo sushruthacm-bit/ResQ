@@ -7,5 +7,5 @@ router.post('/', validate(createEmergencySchema), ctrl.createEmergency);
 router.get('/pending', ctrl.getPendingEmergencies);
 router.get('/active', ctrl.getActiveEmergencies);
 router.patch('/:id/status', validate(updateStatusSchema), ctrl.updateStatus);
-
+router.get('/:id/timeline', ctrl.getTimeline);
 module.exports = router;

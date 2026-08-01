@@ -37,5 +37,15 @@ const updateStatus = async (req, res, next) => {
     next(err);
   }
 };
+const getTimeline = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const data = await emergencyService.getTimeline(Number(id));
+    res.json({ success: true, data });
+  } catch (err) {
+    next(err);
+  }
+};
 
-module.exports = { createEmergency, getPendingEmergencies, getActiveEmergencies, updateStatus };
+module.exports = { createEmergency, getPendingEmergencies, getActiveEmergencies, updateStatus, getTimeline };
+

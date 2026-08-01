@@ -5,5 +5,5 @@ const { assignResponderSchema } = require('../validators/schemas');
 
 router.get('/', ctrl.getAllResponders);
 router.post('/assign', validate(assignResponderSchema), ctrl.assignResponder);
-
+router.post('/auto-assign', ctrl.autoAssignResponder);
 module.exports = router;

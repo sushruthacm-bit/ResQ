@@ -43,4 +43,24 @@ const assignResponder = async ({ request_id, responder_id }) => {
 
 const getAllResponders = async () => responderRepo.findAll();
 
-module.exports = { assignResponder, getAllResponders };
+const autoAssignResponder = async (request_id) => {
+  const emergency = await emergencyRepo.findById(request_id);
+  if (!emergency) throw new AppError('Emergency request not found', 404);
+  if (['resolved', 'cancelled'].includes(emergency.status)) {
+    throw new AppError('Cannot assign responder to a resolved or cancelled emergency', 400);
+  }
+
+  const nearest = await responderRepo.findNearestAvailable(
+    emergency.recommended_responder,
+    emergency.latitude,
+    emergency.longitude
+  );
+
+  if (!nearest) {
+    throw new AppError('No available responder found for this emergency', 404);
+  }
+
+  return assignResponder({ request_id, responder_id: nearest.id });
+};
+
+module.exports = { assignResponder, getAllResponders, autoAssignResponder };

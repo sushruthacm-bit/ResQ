@@ -106,4 +106,23 @@ const updateStatus = async (id, newStatus, changedBy = null) => {
   return updated;
 };
 
-module.exports = { createEmergency, getPendingEmergencies, getActiveEmergencies, updateStatus };
+
+const getTimeline = async (id) => {
+  const emergency = await emergencyRepo.findById(id);
+  if (!emergency) throw new AppError('Emergency request not found', 404);
+
+  const history = await statusHistoryRepo.findByRequestId(id);
+
+  return {
+    request_id: id,
+    current_status: emergency.status,
+    timeline: history.map((h) => ({
+      old_status: h.old_status,
+      new_status: h.new_status,
+      changed_by: h.changed_by,
+      changed_at: h.changed_at,
+    })),
+  };
+};
+
+module.exports = { createEmergency, getPendingEmergencies, getActiveEmergencies, updateStatus, getTimeline };
