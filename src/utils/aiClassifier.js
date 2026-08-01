@@ -30,14 +30,14 @@ const callGroq = async (description) => {
 
   if (!apiKey) throw new Error('GROQ_API_KEY not set');
 
-  const prompt = `You are an emergency dispatch AI. Classify the following emergency description.
-Return ONLY valid JSON with these exact keys: category, priority, recommended_responder.
+ const prompt = `You are an emergency dispatch AI. Classify the following emergency description.
+Return ONLY valid JSON with these exact keys: category, priority, recommended_responder, confidence, reasoning.
 - category must be one of: Medical, Fire, Police
 - priority must be one of: low, medium, high, critical
 - recommended_responder must be one of: Paramedic, Firefighter, Police Officer
-
+- confidence must be a number between 0 and 1 representing how sure you are
+- reasoning must be a short one-sentence explanation of why you chose this category and priority
 Description: "${description}"`;
-
   const response = await axios.post(
     'https://api.groq.com/openai/v1/chat/completions',
     {
@@ -69,10 +69,15 @@ Description: "${description}"`;
   if (!validCategories.includes(parsed.category)) throw new Error('Invalid category from AI');
   if (!validPriorities.includes(parsed.priority)) throw new Error('Invalid priority from AI');
 
+ const confidence = typeof parsed.confidence === 'number' && parsed.confidence >= 0 && parsed.confidence <= 1
+    ? parsed.confidence
+    : 0.5;
   return {
     category: parsed.category,
     priority: parsed.priority,
     recommended_responder: parsed.recommended_responder,
+    confidence,
+    reasoning: parsed.reasoning || 'No reasoning provided by AI',
   };
 };
 

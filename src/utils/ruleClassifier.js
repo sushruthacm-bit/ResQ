@@ -28,22 +28,28 @@ const classify = (description) => {
   const lower = description.toLowerCase();
 
   for (const rule of RULES) {
-    if (rule.keywords.some((kw) => lower.includes(kw))) {
+    const matchedKeyword = rule.keywords.find((kw) => lower.includes(kw));
+    if (matchedKeyword) {
       return {
         category: rule.category,
         priority: rule.priority,
         recommended_responder: rule.responder_type,
         source: 'rule_engine',
+        confidence: 1,
+        reasoning: `Matched keyword "${matchedKeyword}" for category ${rule.category}`,
       };
     }
   }
 
   // Default fallback
+ // Default fallback
   return {
     category: 'Police',
     priority: 'low',
     recommended_responder: 'Police Officer',
     source: 'rule_engine',
+    confidence: 0.3,
+    reasoning: 'No keywords matched; defaulted to lowest-priority category',
   };
 };
 
