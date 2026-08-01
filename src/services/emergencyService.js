@@ -8,6 +8,17 @@ const { EMERGENCY_CREATED, STATUS_UPDATED } = require('../events/eventNames');
 const AppError = require('../utils/AppError');
 const logger = require('../utils/logger');
 
+
+const RESPONSE_TIME_BY_PRIORITY = {
+  critical: 5,
+  high: 10,
+  medium: 20,
+  low: 30,
+};
+
+const calculateEstimatedResponseTime = (priority) => {
+  return RESPONSE_TIME_BY_PRIORITY[priority] ?? 20;
+};
 /**
  * Create a new emergency request:
  * 1. AI classify the description
@@ -36,7 +47,9 @@ const createEmergency = async ({ user_id, latitude, longitude, description }) =>
 
   await logRepo.create({ event: 'emergency:created', payload: { id: emergency.id, priority: emergency.priority } });
 
-  return emergency;
+  const estimated_response_time = calculateEstimatedResponseTime(emergency.priority);
+
+  return { ...emergency, estimated_response_time };
 };
 
 /**
