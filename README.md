@@ -298,3 +298,12 @@ PostgreSQL is always the source of truth. Redis is used for fast queue reads onl
 | `npm start` | Start production server |
 | `npm run migrate` | Run SQL migrations |
 | `npm run seed` | Insert sample data |
+
+
+## New Features (Contribution)
+- AI confidence score + reasoning in classification response
+- Estimated response time based on emergency priority
+- Automatic nearest-available-responder assignment (`POST /api/responders/auto-assign`)
+- Emergency timeline/history endpoint (`GET /api/emergencies/:id/timeline`)
+
+See `API_DOCUMENTATION.md` and `SYSTEM_DESIGN.md` for full details.
